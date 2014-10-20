@@ -23,14 +23,19 @@ angular.module('me.hcai.blind.board', ['ui.bootstrap'])
       'minGrowth': true,
       'dayGrowth': true
     }
+    return figures;
   })
-  .filter("isSelected", function(){
-    return function(input) {
-      return
+  .factory("key2Label", function(){
+    return {
+      'name' : 'Name',
+      'minGrowth': 'Minute Growth',
+      'dayGrowth': 'Day Growth'
     }
   })
-  .controller('boardController', function($scope, stocks, figures) {
+  .controller('boardController', function($scope, stocks, figures, key2Label) {
     $scope.stocks = stocks;
     $scope.figures = figures;
     $scope.searchText = '';
+    $scope.key2Label = key2Label;
+    $scope.sortBy = 'name';
   });
