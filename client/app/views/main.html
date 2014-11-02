@@ -8,17 +8,33 @@
              maxNextMinPredictedGrowth,
              minNextMinPredictedGrowth)}">
       <div class="stock-name">{{stock.name}} </div>
-      <div class="next-min-predicted-growth">
+      <div class="next-min-predicted-growth"
+           data-toggle="tooltip"
+           data-placement="top"
+           title="Predicted Growth in Next Minute"
+           onmouseover="$(this).tooltip('show')">
         {{formatGrowth(stock.nextMinPredictedGrowth)}}%
       </div>
       <div class="other-figures">
-        <div class="last-min-predicted-growth">
+        <div class="last-min-predicted-growth"
+           data-toggle="tooltip"
+           data-placement="left"
+           title="Predicted Growth From Last Minute"
+           onmouseover="$(this).tooltip('show')">
           {{formatGrowth(stock.lastMinPredictedGrowth)}}%
         </div>
-        <div class="last-min-actual-growth">
+        <div class="last-min-actual-growth"
+           data-toggle="tooltip"
+           data-placement="bottom"
+           title="Actual Growth From Last Minute"
+           onmouseover="$(this).tooltip('show')">
           {{formatGrowth(stock.lastMinActualGrowth)}}%
         </div>
-        <div class="error-rate">
+        <div class="error-rate"
+           data-toggle="tooltip"
+           data-placement="right"
+           title="Error Rate"
+           onmouseover="$(this).tooltip('show')">
           {{formatErrorRate(stock.errorRate)}}%
         </div>
       </div>
