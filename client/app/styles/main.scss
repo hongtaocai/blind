@@ -96,13 +96,10 @@ body {
 }
 
 .stock-card {
-  height: 120px;
   background-color: $stockCardBackground;
   border: 2px solid white;
   border-radius: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
+  padding: 5px;
 }
 
 .stock-card-text-div {
@@ -114,5 +111,36 @@ body {
   @extend .stock-card-text-div;
   font-size: 22px;
   margin-top: 5px;
+}
 
+.next-min-predicted-growth {
+  @extend .stock-card-text-div;
+  font-size: 22px;
+}
+
+.other-figures{
+  overflow: hidden;
+  margin:5px 0;
+}
+
+.small-growth-div {
+  float: left;
+  font-size: 12px;
+}
+
+.last-min-predicted-growth {
+  @extend .stock-card-text-div;
+  @extend .small-growth-div;
+  width: 40%;
+}
+
+.last-min-actual-growth {
+  @extend .stock-card-text-div;
+  @extend .small-growth-div;
+  width: 40%;
+}
+
+.error-rate {
+  @extend .stock-card-text-div;
+  @extend .small-growth-div;
 }

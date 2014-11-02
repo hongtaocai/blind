@@ -3,18 +3,18 @@
     <input class="form-control" id="stock-symbol" ng-model="searchText" placeholder="SYMBOL" autofocus/>
   </div>
   <div class="row">
-    <div class="col-md-3 stock-card" ng-repeat="stock in stocks | filter:searchText | orderBy:sortBy:true">
+    <div class="col-md-3 stock-card" ng-repeat="stock in stocks | filter:searchText">
       <div class="stock-name">{{stock.name}} </div>
-      <div class="next-min-predicted-growth">{{stock.nextMinPredictedGrowth}}</div>
+      <div class="next-min-predicted-growth">{{stock.nextMinPredictedGrowth}}%</div>
       <div class="other-figures">
         <div class="last-min-predicted-growth">
-          {{stock.lastMinPredictedGrowth}}
+          {{stock.lastMinPredictedGrowth}}%
         </div>
         <div class="last-min-actual-growth">
-          {{stock.lastMinActualGrowth}}
+          {{stock.lastMinActualGrowth}}%
         </div>
         <div class="error-rate">
-          {{stock.errorRate}}
+          {{stock.errorRate}}%
         </div>
       </div>
     </div>
