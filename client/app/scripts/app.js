@@ -30,4 +30,18 @@ angular
       .otherwise({
         redirectTo: '/'
       });
+  })
+  .controller('AppCtrl', function($scope){
+    $scope.tabs = ['Home', 'About'];
+    $scope.tabsRoute = {
+      Home: '#/home',
+      About: '#/about'
+    };
+    $scope.activeTab = 'Home';
+    $scope.setActiveTab = function(tabName) {
+      $scope.activeTab = tabName;
+    };
+    $scope.getTabClass = function(tabName) {
+      return tabName === $scope.activeTab ? 'active' : '';
+    };
   });
