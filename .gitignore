@@ -1,8 +1,6 @@
-.DS_Store
-*.db
-*.pyc
-*.swp
-*~
-db_repository
-flask
-node_modules
+client/node_modules
+client/dist
+client/.tmp
+client/.sass-cache
+client/bower_components
+.idea
