@@ -1,5 +1,10 @@
-<div class="row marketing">
+<div class="marketing">
   <div id="search-box">
     <input class="form-control" id="stock-symbol" ng-model="searchText" placeholder="SYMBOL" autofocus/>
+  </div>
+  <div class="row">
+    <div class="col-md-2 stock-card" ng-repeat="stock in stocks | filter:searchText | orderBy:sortBy:true">
+      {{stock.name}} <BR/>
+    </div>
   </div>
 </div>
