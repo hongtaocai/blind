@@ -17,18 +17,14 @@ angular.module('clientApp')
       }
       return result;
     }
-    function formatGrowth(growth) {
-      var prefix = growth >= 0 ? '+' : '';
-      return prefix + growth.toFixed(4);
-    }
     var stocks = [];
     for (var i = 0; i < 52 ; i++ ) {
       stocks.push({
         'name': randomString(4),
-        'lastMinPredictedGrowth': formatGrowth(Math.random()*2 -1),
-        'nextMinPredictedGrowth': formatGrowth(Math.random()*2 -1),
-        'lastMinActualGrowth': formatGrowth(Math.random()*2 -1),
-        'errorRate': Math.floor(Math.random()*100)
+        'lastMinPredictedGrowth': Math.random()*2 -1,
+        'nextMinPredictedGrowth': Math.random()*2 -1,
+        'lastMinActualGrowth': Math.random()*2 -1,
+        'errorRate': Math.random()*100
       });
     }
     return stocks;
@@ -36,5 +32,12 @@ angular.module('clientApp')
   .controller('MainCtrl', function ($scope, stocks) {
     $scope.searchText = '';
     $scope.stocks = stocks;
+    $scope.formatGrowth = function(growth) {
+      var prefix = growth >= 0 ? '+' : '';
+      return prefix + growth.toFixed(4);
+    };
+    $scope.formatErrorRate = function(errorRate) {
+      return Math.floor(errorRate);
+    };
   });
 

@@ -5,16 +5,16 @@
   <div class="row">
     <div class="col-md-3 stock-card" ng-repeat="stock in stocks | filter:searchText">
       <div class="stock-name">{{stock.name}} </div>
-      <div class="next-min-predicted-growth">{{stock.nextMinPredictedGrowth}}%</div>
+      <div class="next-min-predicted-growth">{{formatGrowth(stock.nextMinPredictedGrowth)}}%</div>
       <div class="other-figures">
         <div class="last-min-predicted-growth">
-          {{stock.lastMinPredictedGrowth}}%
+          {{formatGrowth(stock.lastMinPredictedGrowth)}}%
         </div>
         <div class="last-min-actual-growth">
-          {{stock.lastMinActualGrowth}}%
+          {{formatGrowth(stock.lastMinActualGrowth)}}%
         </div>
         <div class="error-rate">
-          {{stock.errorRate}}%
+          {{formatErrorRate(stock.errorRate)}}%
         </div>
       </div>
     </div>
