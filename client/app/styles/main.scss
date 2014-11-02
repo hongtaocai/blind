@@ -3,6 +3,8 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/boots
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap.scss";
 // endbower
 
+$stockCardBackground: #428bca;
+
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;
@@ -81,7 +83,7 @@ body {
 }
 
 #search-box {
-  padding-bottom: 10px;
+  padding-bottom: 40px;
 }
 
 #stock-symbol {
@@ -91,4 +93,26 @@ body {
   font-size: 20px;
   height: 45px;
   text-transform: uppercase;
+}
+
+.stock-card {
+  height: 120px;
+  background-color: $stockCardBackground;
+  border: 2px solid white;
+  border-radius: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+}
+
+.stock-card-text-div {
+  color: white;
+  text-align: center;
+}
+
+.stock-name {
+  @extend .stock-card-text-div;
+  font-size: 22px;
+  margin-top: 5px;
+
 }

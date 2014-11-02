@@ -18,16 +18,16 @@ angular.module('clientApp')
       return result;
     }
     function formatGrowth(growth) {
-      var prefix = growth >= 0 ? '+' : '-';
-      return prefix + growth;
+      var prefix = growth >= 0 ? '+' : '';
+      return prefix + growth.toFixed(4);
     }
     var stocks = [];
-    for (var i = 0; i < 50 ; i++ ) {
+    for (var i = 0; i < 52 ; i++ ) {
       stocks.push({
         'name': randomString(4),
-        'lastMinRealGrowth': formatGrowth(Math.random().toFixed(4)*2 -1),
-        'nextMinPredictedGrowth': formatGrowth(Math.random().toFixed(4)),
-        'lastMinPredictedGrowth': formatGrowth(Math.random().toFixed(4)),
+        'lastMinPredictedGrowth': formatGrowth(Math.random()*2 -1),
+        'nextMinPredictedGrowth': formatGrowth(Math.random()*2 -1),
+        'lastMinActualGrowth': formatGrowth(Math.random()*2 -1),
         'errorRate': Math.floor(Math.random()*100)
       });
     }
