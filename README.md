@@ -1,4 +1,0 @@
-blind
-=====
-
-Merket Forecast
