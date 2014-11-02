@@ -3,9 +3,12 @@
     <input class="form-control" id="stock-symbol" ng-model="searchText" placeholder="SYMBOL" autofocus/>
   </div>
   <div class="row">
-    <div class="col-md-3 stock-card" ng-repeat="stock in stocks | filter:searchText">
+    <div class="col-md-3 stock-card" ng-repeat="stock in stocks | filter:searchText | orderBy:'nextMinPredictedGrowth':true"
+         ng-style="{'background-color': getColorFromGrowth(stock.nextMinPredictedGrowth,
+             maxNextMinPredictedGrowth,
+             minNextMinPredictedGrowth)}">
       <div class="stock-name">{{stock.name}} </div>
-      <div class="next-min-predicted-growth" popover-placement="top" popover="On the Top!" onMouseover="$(this).popover('show')">
+      <div class="next-min-predicted-growth">
         {{formatGrowth(stock.nextMinPredictedGrowth)}}%
       </div>
       <div class="other-figures">
