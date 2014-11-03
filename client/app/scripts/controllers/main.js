@@ -73,5 +73,9 @@ angular.module('clientApp')
         return scale(growth/minGrowth).hex();
       }
     };
+
+    $scope.redirectToStock = function(stockName) {
+      window.location = '/#/detail/'+stockName;
+    };
   });
 

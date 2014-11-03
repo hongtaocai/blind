@@ -100,6 +100,13 @@ body {
   border: 2px solid white;
   border-radius: 5px;
   padding: 5px;
+  cursor: pointer;
+  display: block;
+}
+
+a.stock-card:hover {
+  color: white;
+  text-decoration: none;
 }
 
 .stock-card-text-div {

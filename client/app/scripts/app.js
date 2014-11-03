@@ -27,6 +27,10 @@ angular
         templateUrl: 'views/about.html',
         controller: 'AboutCtrl'
       })
+      .when('/detail/:stockName', {
+        templateUrl: 'views/detail.html',
+        controller: 'DetailCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });

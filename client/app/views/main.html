@@ -1,12 +1,13 @@
 <div class="marketing">
   <div id="search-box">
-    <input class="form-control" id="stock-symbol" ng-model="searchText" placeholder="SYMBOL" autofocus/>
+    <input class="form-control" id="stock-symbol" ng-model="searchText.name" placeholder="SYMBOL" autofocus/>
   </div>
   <div class="row">
     <div class="col-md-3 stock-card" ng-repeat="stock in stocks | filter:searchText | orderBy:'nextMinPredictedGrowth':true"
          ng-style="{'background-color': getColorFromGrowth(stock.nextMinPredictedGrowth,
              maxNextMinPredictedGrowth,
-             minNextMinPredictedGrowth)}">
+             minNextMinPredictedGrowth)}"
+         ng-click="redirectToStock(stock.name)">
       <div class="stock-name">{{stock.name}} </div>
       <div class="next-min-predicted-growth"
            data-toggle="tooltip"
