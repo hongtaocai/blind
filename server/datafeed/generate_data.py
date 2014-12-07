@@ -51,9 +51,8 @@ def run():
             insertIntoDatabase(data);
             #analyze();
 
-timeNow = datetime.now(eastern)
-data = yahoostockquote.get_stock_realtime_data(bStockConfig.symbols, timeNow);
-insertIntoDatabase(data);
+if __name__ == "__main__":
+    run()
   #
   # def run(self):
   #   while(True):
