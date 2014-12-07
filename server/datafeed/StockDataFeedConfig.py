@@ -1,10 +1,6 @@
 __author__ = 'hcai'
 
 class StockDataFeedConfig:
-  #
-  #
-  #
-  #
   def __init__(
       self,
       mongoDBUsername,
