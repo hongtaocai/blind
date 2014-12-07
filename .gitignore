@@ -4,5 +4,4 @@ client/.tmp
 client/.sass-cache
 client/bower_components
 .idea
-server/datafeed/deployConfig.py
 *.pyc

@@ -6,14 +6,14 @@ import json
 import bStockConfig
 import calendar
 import pymongo
+import deployConfig
 
 __author__ = 'hongtaocai'
 
 eastern = timezone('US/Eastern')
 minuteDataReady = {}
 timeNow = None
-client  = pymongo.MongoClient("localhost", 27017);
-db = client.blind1;
+client  = pymongo.MongoClient(deployConfig.mongoHost, deployConfig.mongoPort);
 
 def isTradingHour(timeNow):
     if(timeNow.weekday > 4 ):
@@ -38,21 +38,29 @@ def shouldCrawlNow(timeNow):
     return True
 
 def insertIntoDatabase(data):
-    db.blind1.insert(data);
+    if (deployConfig.env == 'dev'):
+        db = client.blindDev
+        db.stocks.insert(data)
+    if (deployConfig.env == 'prod'):
+        db = client.blind
+        db.stocks.insert(data)
 
 def run():
+    global eastern
     while(True):
-        global eastern
         timeNow = datetime.now(eastern)
         if(not shouldCrawlNow(timeNow)):
             time.sleep(1);
         else:
-            data = yahoostockquote.get_stock_realtime_data(bStockConfig.symbols, timeNow);
-            insertIntoDatabase(data);
+            data = yahoostockquote.get_stock_realtime_data(bStockConfig.symbols, timeNow)
+            print str(timeNow) + ' (EST) write to database..'
+            insertIntoDatabase(data)
             #analyze();
 
 if __name__ == "__main__":
     run()
+
+# insertIntoDatabase(data)
   #
   # def run(self):
   #   while(True):
