@@ -57,7 +57,8 @@ def run():
             insertIntoDatabase(data)
             #analyze();
 
-run()
+if __name__ == "__main__":
+    run()
 
 # insertIntoDatabase(data)
   #
