@@ -53,13 +53,12 @@ def run():
             time.sleep(1);
         else:
             data = yahoostockquote.get_stock_realtime_data(bStockConfig.symbols, timeNow)
+            print str(timeNow) + ' (EST) write to database..'
             insertIntoDatabase(data)
             #analyze();
 
 run()
 
-# timeNow = datetime.now(eastern)
-# data = yahoostockquote.get_stock_realtime_data(bStockConfig.symbols, timeNow)
 # insertIntoDatabase(data)
   #
   # def run(self):
