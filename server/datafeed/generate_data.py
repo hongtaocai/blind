@@ -16,7 +16,10 @@ timeNow = None
 client  = pymongo.MongoClient(deployConfig.mongoHost, deployConfig.mongoPort);
 
 def isTradingHour(timeNow):
-    if(timeNow.weekday > 4 ):
+    #print timeNow.weekday();
+    #print timeNow.hour;
+    #print timeNow.minute;
+    if(timeNow.weekday() > 4 ):
         return False
     if(timeNow.hour < 9):
         return False
@@ -29,9 +32,10 @@ def isTradingHour(timeNow):
 def shouldCrawlNow(timeNow):
     global eastern
     global minuteDataReady
+    #print isTradingHour(timeNow);
     if not isTradingHour(timeNow):
         return False
-    if(minuteDataReady[timeNow.minute]):
+    if(timeNow.minute in minuteDataReady):
         return False
     minuteDataReady.clear()
     minuteDataReady[timeNow.minute] = True
