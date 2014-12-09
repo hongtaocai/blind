@@ -2,20 +2,48 @@ from urllib2 import Request, urlopen
 import json
 import calendar
 
+
+'''
+{'c': '-2.20',  # change
+ 'c_fix': '-2.20', # fixed change
+ 'ccol': 'chr',
+ 'cp': '-5.72', # change in percent
+ 'cp_fix': '-5.72', # change in percent fix
+ 'div': '',
+ 'e': 'NYSE',  #exchange
+ 'ec': '0.00',
+ 'ec_fix': '0.00',
+ 'eccol': 'chb',
+ 'ecp': '0.00',
+ 'ecp_fix': '0.00',
+ 'el': '36.29',
+ 'el_cur': '36.29',
+ 'el_fix': '36.29', # last trade price fix
+ 'elt': 'Dec 8, 7:59PM EST',
+ 'id': '32086821185414',
+ 'l': '36.29', # last trade price
+ 'l_cur': '36.29', # last trade price current
+ 'l_fix': '36.29', # last trade price current
+ 'lt': 'Dec 8, 4:00PM EST', # last trade price
+ 'lt_dts': '2014-12-08T16:00:08Z',
+ 'ltt': '4:00PM EST',
+ 'pcls_fix': '38.49', # previous close
+ 's': '2',
+ 't': 'TWTR',
+ 'yld': ''}
+'''
+
 def _build_url(symbols):
-    symbol_list = ','.join(['%22'+symbol+'%22' for symbol in symbols])
-    return 'https://query.yahooapis.com/v1/public/yql?' \
-        + 'q=select%20*%20from%20yahoo.finance.quotes%20' \
-        + 'where%20symbol%20in%20(' \
-        + symbol_list \
-        + ')&format=json&diagnostics=true&' \
-        + 'env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback='
+    symbol_list = ','.join([symbol for symbol in symbols])
+    return 'http://finance.google.com/finance/info?client=ig&q=' \
+        + symbol_list
 
 def _request(symbols):
     url = _build_url(symbols)
     req = Request(url)
     resp = urlopen(req)
     content = resp.read().decode().strip()
+    content = content[3:]
     return content
 
 def strToNumber(s):
@@ -51,6 +79,6 @@ def addTimeStamp(objList, timeStamp):
 
 def get_stock_realtime_data(symbols, timeStamp ):
     content = json.loads(_request(symbols))
-    quotes = content['query']['results']['quote'];
+    quotes = content;
     addTimeStamp(quotes, timeStamp)
     return convertStrValToNumberList(quotes)

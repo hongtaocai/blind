@@ -7,8 +7,10 @@ import bStockConfig
 import calendar
 import pymongo
 import deployConfig
+import googlefinance
 
 __author__ = 'hongtaocai'
+
 
 eastern = timezone('US/Eastern')
 minuteDataReady = {}
@@ -41,13 +43,19 @@ def shouldCrawlNow(timeNow):
     minuteDataReady[timeNow.minute] = True
     return True
 
-def insertIntoDatabase(data):
+def insertIntoDatabase(gdata, ydata):
     if (deployConfig.env == 'dev'):
         db = client.blindDev
-        db.stocks.insert(data)
+        if(not ydata is None and len(ydata)>0):
+            db.stocks.insert(ydata)
+        if(not gdata is None and len(gdata)>0):
+            db.gstocks.insert(gdata)
     if (deployConfig.env == 'prod'):
         db = client.blind
-        db.stocks.insert(data)
+        if(not ydata is None and len(ydata)>0):
+            db.stocks.insert(ydata)
+        if(not gdata is None and len(gdata)>0):
+            db.gstocks.insert(gdata)
 
 def run():
     global eastern
@@ -56,9 +64,10 @@ def run():
         if(not shouldCrawlNow(timeNow)):
             time.sleep(1);
         else:
-            data = yahoostockquote.get_stock_realtime_data(bStockConfig.symbols, timeNow)
+            googledata = googlefinance.get_stock_realtime_data(bStockConfig.symbols, timeNow)
+            yahoodata = yahoostockquote.get_stock_realtime_data(bStockConfig.symbols, timeNow)
             print str(timeNow) + ' (EST) write to database..'
-            insertIntoDatabase(data)
+            insertIntoDatabase(gdata=googledata, ydata=yahoodata);
             #analyze();
 
 if __name__ == "__main__":
