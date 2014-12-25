@@ -64,8 +64,18 @@ def run():
         if(not shouldCrawlNow(timeNow)):
             time.sleep(1);
         else:
-            googledata = googlefinance.get_stock_realtime_data(bStockConfig.symbols, timeNow)
-            yahoodata = yahoostockquote.get_stock_realtime_data(bStockConfig.symbols, timeNow)
+            googledata = None
+            yahoodata = None
+            try:
+                googledata = googlefinance.get_stock_realtime_data(bStockConfig.symbols, timeNow)
+            except:
+                print "Google Error:" , sys.exc_info()[0]
+                googledata = None
+            try:
+                yahoodata = yahoostockquote.get_stock_realtime_data(bStockConfig.symbols, timeNow)
+            except:
+                print "Yahoo Error:" , sys.exc_info()[0]
+                yahoodata = None
             print str(timeNow) + ' (EST) write to database..'
             insertIntoDatabase(gdata=googledata, ydata=yahoodata);
             #analyze();
