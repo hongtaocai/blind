@@ -11,16 +11,11 @@ import googlefinance
 
 __author__ = 'hongtaocai'
 
-
 eastern = timezone('US/Eastern')
-minuteDataReady = {}
+secondDataReady = {}
 timeNow = None
-client  = pymongo.MongoClient(deployConfig.mongoHost, deployConfig.mongoPort);
 
 def isTradingHour(timeNow):
-    #print timeNow.weekday();
-    #print timeNow.hour;
-    #print timeNow.minute;
     if(timeNow.weekday() > 4 ):
         return False
     if(timeNow.hour < 9):
@@ -34,16 +29,15 @@ def isTradingHour(timeNow):
 def shouldCrawlNow(timeNow):
     global eastern
     global minuteDataReady
-    #print isTradingHour(timeNow);
     if not isTradingHour(timeNow):
         return False
-    if(timeNow.minute in minuteDataReady):
+    if(timeNow.second in secondDataReady or timeNow.second%10 !=0):
         return False
-    minuteDataReady.clear()
-    minuteDataReady[timeNow.minute] = True
+    secondDataReady.clear()
+    secondDataReady[timeNow.second] = True
     return True
 
-def insertIntoDatabase(gdata, ydata):
+def insertIntoDatabase(gdata, ydata, client):
     if (deployConfig.env == 'dev'):
         db = client.blindDev
         if(not ydata is None and len(ydata)>0):
@@ -57,8 +51,21 @@ def insertIntoDatabase(gdata, ydata):
         if(not gdata is None and len(gdata)>0):
             db.gstocks.insert(gdata)
 
+def testShouldCrawlNow() :
+    global eastern
+    while(True) :
+        timeNow = datetime.now(eastern)
+        timeNow = timeNow.replace(year=2015, month=1, day=9, hour=10)
+        assert(isTradingHour(timeNow))
+        if not shouldCrawlNow(timeNow):
+          print timeNow
+          time.sleep(1);
+        else:
+          print "Database Operation"
+
 def run():
     global eastern
+    client  = pymongo.MongoClient(deployConfig.mongoHost, deployConfig.mongoPort);
     while(True):
         timeNow = datetime.now(eastern)
         if(not shouldCrawlNow(timeNow)):
@@ -77,40 +84,8 @@ def run():
                 print "Yahoo Error:" , sys.exc_info()[0]
                 yahoodata = None
             print str(timeNow) + ' (EST) write to database..'
-            insertIntoDatabase(gdata=googledata, ydata=yahoodata);
+            insertIntoDatabase(gdata=googledata, ydata=yahoodata, client = client);
             #analyze();
 
 if __name__ == "__main__":
     run()
-
-# insertIntoDatabase(data)
-  #
-  # def run(self):
-  #   while(True):
-      # while(not the first second of a minute)
-      #   print 'wait: current time is'+ time
-      #   sleep(1s)
-      # print time
-      # print 'start to fetch data'
-      # post request
-      # synchronsly wait for response
-      # get response
-      # write to database
-      # read all data from database
-      # write back prediction
-      # train self.random Forest Model
-      # save the self.Model
-
-  # def statistics(self):
-  #   while(true):
-      # while(not the 31st second of a minute)
-      #   print 'wait: current time is'+ time
-      #   sleep(1s)
-      # print time
-      # print 'start to fetch data'
-      # track the latest time stamp
-      # read new data from database
-      # aggregate and check errorRate
-      # write back errorRate
-      # train self.random Forest Model
-      # save the self.Model
