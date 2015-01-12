@@ -31,7 +31,7 @@ def shouldCrawlNow(timeNow):
     global minuteDataReady
     if not isTradingHour(timeNow):
         return False
-    if(timeNow.second in secondDataReady or timeNow.second%10 !=0):
+    if(timeNow.second in secondDataReady or timeNow.second !=35):
         return False
     secondDataReady.clear()
     secondDataReady[timeNow.second] = True

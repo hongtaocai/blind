@@ -4,6 +4,8 @@ from pymongo import MongoClient
 import csv
 from bStockConfig import symbols
 import scipy
+import numpy as np
+
 
 def convertOutcomeToClass(t, threshold):
   if t > threshold:
@@ -63,8 +65,9 @@ for symbol in symbols:
       data.append(dataline)
 
   vd = [ d[-1] for d in data]
-  print symbol, "\t", scipy.var(vd)
-  v_d_list.append((symbol, scipy.var(vd)))
+  n1 = np.linalg.norm(vd, ord=1)
+  print symbol, "\t", n1
+  v_d_list.append((symbol, n1))
 
   #print (len(data))
   #print (len(data[0]))
