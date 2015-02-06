@@ -15,9 +15,8 @@ from sklearn.cross_validation import cross_val_score
 eastern = timezone('US/Eastern')
 historyLength = 30
 topNStocks = 10
-thresholdPercent = 0.2 # %
-
-clfs = {}
+thresholdPercent = 0.15 # %
+tradestocks = ['AMGN','CELG','FB', 'CTSH', 'CMCSA' ,'ALXN','ESRX', 'BIIB', 'COST', 'WAG']
 
 def getThreshold(symbol, stocks):
   return stocks[symbol][0][1] * thresholdPercent / 100.0
@@ -35,18 +34,15 @@ def refreshStocks(col):
   stocks = {}
   stockvars = {}
   for s in symbols:
-    stock = []
-    stockpr = []
-    for ti in col.find({ "t" : s, "timestamp" : { "$gt" : oneWeekAgo, '$lt': oneWeekAgo + 7*24*3600}}).sort("timestamp"):
-      pr = ti['l_cur']
-      if isinstance(pr, unicode) :
-        pr = float(pr.replace(',', ''))
-      stock.append( [ti['timestamp'], pr] )
-      stockpr.append(pr)
-    stocks[s] = stock
-    stockvars[s] = np.std(stockpr)/stockpr[0]
-    print 'var:', s ,':', stockvars[s]
-  return stocks, stockvars
+    stocks[s] = []
+  print "refreshing stocks..."
+  for ti in col.find({"timestamp" : { "$gt" : oneWeekAgo, '$lt': oneWeekAgo + 6*24*3600}}).sort("timestamp"):
+    s = ti['t']
+    pr = ti['l_cur']
+    if isinstance(pr, unicode) :
+      pr = float(pr.replace(',', ''))
+    stocks[s].append( [ti['timestamp'], pr] )
+  return stocks, {}
 
 def calPriceDelta(stocks):
   priceDelta = {}
@@ -121,22 +117,31 @@ def simulate(clf, testX, testP, pri, onlybuy = True):
   pY = clf.predict(testX)
   sum = 0
   tNo = 0
+  tstr = '';
   for i in range(len(pY)):
     if pY[i] == 1:
       sum += testP[i]
       tNo += 1
+      tstr += '+'
     elif pY[i] == -1 and not onlybuy:
       sum -= testP[i]
       tNo += 1
+      tstr += '-'
+    else:
+      tstr += '*'
+  #print tstr
   return tNo, sum/pri*1e2
 
 def getModels(train, trainAll, test, stocks):
   classifiers = {}
+  g = {}
   for s in train:
     if len(train[s]['x']) == 0 :
       continue
     clf = RandomForestClassifier(n_estimators=150)
     clf.fit(train[s]["x"], train[s]["y"])
+    number, gain = simulate(clf, test[s]["x"], test[s]["p"], stocks[s][0][1], True)
+    g[s] = gain
     print s, "-> score: ", clf.score(test[s]["x"], test[s]["y"]), \
       " simulated rev lastDay (long): ", simulate(clf, test[s]["x"], test[s]["p"], stocks[s][0][1], True), \
       " (long&short): ", simulate(clf, test[s]["x"], test[s]["p"], stocks[s][0][1], False), \
@@ -144,11 +149,14 @@ def getModels(train, trainAll, test, stocks):
     clf = RandomForestClassifier(n_estimators=150)
     clf.fit(trainAll[s]["x"], trainAll[s]["y"])
     classifiers[s] = clf
-  return classifiers
+  xx = sorted(g.items(), key=operator.itemgetter(1))
+  print "total gain:\n", xx
+  print sum(g.values())
+  print sum([g[s] for s in tradestocks])
+  return classifiers, g
 
-def run():
-  global clfs
-  client = MongoClient('mongodb://hongtao.cai.loves.sixin.li:27017')
+def trainClassifiers(client):
+  #client = MongoClient('mongodb://hongtao.cai.loves.sixin.li:27017')
   db = client.blind
   col = db.gstocks
   stocks, stockvars = refreshStocks(col)
@@ -157,6 +165,8 @@ def run():
   print topKHightVarStocks
   priceDelta = calPriceDelta(stocks)
   train, test, trainAll, th = genTrainingData(priceDelta, stocks)
-  clfs = getModels(train, trainAll, test, stocks)
+  return getModels(train, trainAll, test, stocks)
 
-run()
+if __name__ == "__main__":
+  client = MongoClient('mongodb://blog.hcai.me:27017')
+  trainClassifiers(client)

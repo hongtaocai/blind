@@ -4,16 +4,25 @@ from pymongo import MongoClient
 import csv
 from random import shuffle, sample
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.cross_validation import train_test_split
 from sklearn.cross_validation import cross_val_score
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
+import numpy as np
+import calendar
+from datetime import datetime
+from pytz import timezone
+
+eastern = timezone('US/Eastern')
 
 def convertOutcomeToClass(t, threshold):
   if t > threshold:
     return 1
-  if t <= -threshold:
-    return -1
-  return 0
+  if t > 0:
+    return 2
+  if t > -threshold:
+    return 3
+  return 4
 
 def subarray(arr, n, pr):
   train = []
@@ -33,17 +42,19 @@ client = MongoClient('mongodb://hongtao.cai.loves.sixin.li:27017')
 db = client.blind
 col = db.gstocks
 
-dateAndPrice = [];
+dateAndPrice = []
 
-historyLength = 20
+historyLength = 60
+futureLength = 30
+thth = 0.09
+stocksymbol = 'CTSH'
+oneWeekAgo = calendar.timegm(datetime.now(eastern).utctimetuple()) - 14*24*3600
 
-for ti in col.find({ "t" : 'ALXN'}).sort("timestamp"):
+for ti in col.find({ "t" : stocksymbol, "timestamp" : { "$gt" : oneWeekAgo, '$lt': oneWeekAgo + 14*24*3600}}).sort("timestamp"):
   pr = ti['l_cur']
   if isinstance(pr, unicode):
     pr = float(pr.replace(',', ''))
   dateAndPrice.append([ti['timestamp'], pr])
-
-#print dateAndPrice
 
 dateAndDeltaPrice = [];
 cur = [];
@@ -54,7 +65,7 @@ for i in range(len(dateAndPrice)):
   timeDiff = dateAndPrice[i][0] - dateAndPrice[i-1][0]
   if timeDiff > 120:
     dateAndDeltaPrice.append(cur)
-    cur = [];
+    cur = []
   else:
     priceDelta = dateAndPrice[i][1] - dateAndPrice[i-1][1]
     cur.append([dateAndPrice[i][0], priceDelta])
@@ -78,93 +89,137 @@ price = []
 for period in dateAndDeltaPrice:
   if (len(period) < historyLength+1):
     continue
-  for start in range(len(period)-historyLength-1):
-    p = period[start:(start+historyLength+1)]
+  for start in range(len(period)-historyLength-futureLength):
+    p = period[start:(start+historyLength)]
+    cc = period[(start+historyLength+futureLength)][1] - period[(start+historyLength)][1]
+    #print cc;
     dataline = [t[1] for t in p]
     if( all(v==0 for v in dataline)) :
       continue
-    pp = dataline[-1]
-    c = convertOutcomeToClass(dataline[-1], 0.2)
+    c = convertOutcomeToClass(cc, thth)
     #print c
-    dataline[-1] = p[-1][0]%86400
+    dataline.append((p[-1][0]+60)%86400)
+    dataline.append(cc)
     dataline.append(c)
     data.append(dataline)
-    if c == 0 :
-      stay.append(dataline)
-      stayp.append(pp)
-    elif c== 1:
-      up.append(dataline)
-      upp.append(pp)
-    elif c==-1:
-      down.append(dataline)
-      downp.append(pp)
-
-l = int(min(len(stay), len(up), len(down))*0.6)
-
-stay1, stay1test, stayprice = subarray(stay, l, stayp)
-up1, up1test, upprice = subarray(up, l, upp)
-down1, down1test, downprice = subarray(down, l, downp)
-
-print len(stay), " ", len(up), " ", len(down)
-
-data1 = []
-data1.extend(stay1)
-data1.extend(up1)
-data1.extend(down1)
-shuffle(data1)
-
-X = []
-Y = []
-for d in data1:
-  X.append(d[:-1])
-  Y.append(d[-1])
-
-data = []
-data.extend(stay1test)
-data.extend(up1test)
-data.extend(down1test)
-price = []
-price.extend(stayprice)
-price.extend(upprice)
-price.extend(downprice)
-
+#     if c== 1:
+#       up.append(dataline)
+#       upp.append(cc)
+#     elif c==-1:
+#       down.append(dataline)
+#       downp.append(cc)
+#
+# l = int(min(len(up), len(down))*0.5)
+#
+# up1, up1test, upprice = subarray(up, l, upp)
+# down1, down1test, downprice = subarray(down, int(len(down)*0.5), downp)
+#
+# print "size of up and down", len(up), len(down)
+#
+# data1 = []
+# data1.extend(up1)
+# data1.extend(down1)
+# shuffle(data1)
+#
+# X = []
+# Y = []
+# for d in data1:
+#   X.append(d[:-1])
+#   Y.append(d[-1])
+#
+# data = []
+# data.extend(up1test)
+# data.extend(down1test)
+# price = []
+# price.extend(upprice)
+# price.extend(downprice)
+#
 XData = []
 YData = []
 for d in data:
-  XData.append(d[:-1])
+  XData.append(d[:-2])
   YData.append(d[-1])
 
+X_train, X_test, y_train, y_test = train_test_split(XData, YData, test_size=0.4, random_state=0)
+
 clf = RandomForestClassifier(n_estimators=140)
-clf.fit(X,Y)
+clf.fit(X_train, y_train)
 
-scores = cross_val_score(clf, X, Y)
-print scores.mean()
+print clf.score(X_test, y_test)
 
-YPre = clf.predict(XData)
+YPro = clf.predict_proba(X_test)
+print clf.classes_
+print YPro
 
-sum = 0.0;
+buyIndex = []
 
-for i in range(len(XData)):
-  if YPre[i] == 1:
-    sum += price[i]
-  elif YPre[i] == -1:
-    sum -= price[i]
+for i in range(len(YPro)):
+  pp = YPro[i][0] * 0.25 + YPro[i][1] * 0.04 - YPro[i][2] * 0.04 - YPro[i][3] * 0.25
+  if pp > 0.07:
+    buyIndex.append(i);
 
-print "sum:", sum
+print "buy index size:", len(buyIndex)
 
-cm = confusion_matrix(YData, YPre)
+money = 0.0
 
-print cm
+for i in buyIndex:
+  if y_test[i] == 1:
+    money += 0.23
+  elif y_test[i] == 2:
+    money += 0.02
+  elif y_test[i] == 3:
+    money += -0.06
+  elif y_test[i] == 4:
+    money += -0.27
 
-plt.matshow(cm)
-plt.title('Confusion matrix')
-plt.colorbar()
-plt.ylabel('True label')
-plt.xlabel('Predicted label')
-plt.show()
-
+print "money:", money
+#
+# scores = cross_val_score(clf, X, Y)
+# print scores.mean()
+#
+# YPre = clf.predict(XData)
+#
+# YPro = clf.predict_proba(XData)
+# print YPro
+#
+# sum1 = 0.0;
+# number = 0;
+# trade = []
+#
+# for i in range(len(XData)):
+#   if YPro[i][1] > 0.75:
+#     trade.append(price[i])
+#     sum1 += price[i]
+#     number += 1;
+#   #elif YPre[i] == -1:
+#   #  sum -= price[i]
+#
+# print "sum:", sum1, " num:", number
+# print trade
+#
+# cm = confusion_matrix(YData, YPre)
+# #
+# print cm
+#
+# plt.matshow(cm)
+# plt.title('Confusion matrix')
+# plt.colorbar()
+# plt.ylabel('True label')
+# plt.xlabel('Predicted label')
+# plt.show()
 
 f = open("output.csv", "wb")
 writer = csv.writer(f)
-writer.writerow(range(len(data1[0])))
-writer.writerows(data1)
+writer.writerow(range(len(data[0])))
+writer.writerows(data)
+
+futureData = [ d[61] for d in data ]
+futureData = sorted(futureData)
+l = len(futureData)
+print l
+print futureData[int(l*0.25)], futureData[int(l*0.5)], futureData[int(l*0.75)], futureData[int(l-1)]
+
+print sum(futureData[0:int(l*0.25)])/(l*0.25)
+print sum(futureData[int(l*0.25):int(l*0.5)])/(l*0.25)
+print sum(futureData[int(l*0.5):int(l*0.75)])/(l*0.25)
+print sum(futureData[int(l*0.75):])/(l*0.25)
